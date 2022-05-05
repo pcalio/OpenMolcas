@@ -272,8 +272,6 @@ The method is compatible with density fitting techniques available within
 |openmolcas|, subsequent MC-PDFT calculations to recover correlation
 outside the active space and state-averaging across multiple multiplicities.
 
-
-
 .. _UG\:sec\:StochCAS_dependencies:
 
 Dependencies
@@ -304,11 +302,16 @@ Two files are produced by the :program:`RASSCF` module at each MCSCF macro-itera
 The Input and the FCIDUMP files are the only files necessary to :program:`NECI` to run a FCIQMC simulation from scratch.
 For questions about the FCIQMC dynamics we invite to contact its developers.
 
-As accurate density matrices are necessary for a successful Stochastic-CASSCF calculation,
-users are invited to use the :file:`dneci.x` and :file:`mneci.x` binaries (this will run the FCIQMC dynamic in replica mode) :cite:`Overy2014`.
-The FCIQMC dymanics can be followed in the :file:`fciqmc.out` output file or in the :program:`NECI` generated :file:`FCIMCStats` file.
-In the :file:`fciqmc.out` there are important pieces of information, such as the list of Slater determinants dominating the FCI wave function and the RDM energy. The latter is passed to |molcas| as shown in the script below.
-When a stationary condition is reached and density matrices sampled these are passed to the :file:`RASSCF` program to continue.
+As accurate density matrices are necessary for a successful Stochastic-CASSCF
+calculation, users are required to use the :file:`dneci.x` and :file:`mneci.x`
+binaries (this will run the FCIQMC dynamic in replica mode) :cite:`Overy2014`.
+The FCIQMC dymanics can be followed in the :file:`fciqmc.out` output file or in
+the :program:`NECI` generated :file:`FCIMCStats` file. In the
+:file:`fciqmc.out` file there are important pieces of information, such as the list
+of Slater determinants dominating the FCI wave function and the RDM energy. The
+latter is passed to |openmolcas| as shown in the script below. When a stationary
+condition is reached and density matrices sampled these are passed to the
+:file:`RASSCF` program to continue.
 This can be achieved by a simple script, such as the following: ::
 
   cp TwoRDM_aaaa.1 $WorkDir/$Project.TwoRDM_aaaa
@@ -326,11 +329,11 @@ all roots is consistent between |openmolcas| and :program:`NECI`. For instance, 
 SA-CASSCF on a system admitting 2 doublets, 4 quartets, 3 sextets, 2 octets and
 1 dectet. Using the :file:`FCIDUMP` provided by |openmolcas| (multiplicity in the |openmolcas|
 input is disabled for these calculations, but should nevertheless be provided),
-one can complete the :program:`NECI` dynamics; afterwards |openmolcas| will now prompt for 12
+one can complete the :program:`NECI` dynamics, afterwards |openmolcas| will prompt for 12
 consecutively numbered density matrices and energies, i.e.: ::
 
   When finished do:
-     cp TwoRDM_* /$YOUR_WORKDIR/mn3o4.25136
+     cp TwoRDM_* /$YOUR_WORKDIR/
      echo $your_RDM_Energy > /$YOUR_WORKDIR/NEWCYCLE
 
 A shell script which also takes care of renaming the RDMs might look
@@ -487,8 +490,6 @@ Optional important keywords are:
                 REOR
                   3
                   4 5 1
-
-              leads to an order of [4 2 3 5 1 6].
               </HELP>
               </KEYWORD>
 
@@ -936,6 +937,56 @@ A list of these keywords is given below:
               lines are read. A state average calculation will be
               performed over the NROOTS lowest states with equal
               weights.
+              </HELP>
+              </KEYWORD>
+
+:kword:`SSCR`
+  Computes the orbital resolved spin--spin correlation function between at most
+  two different ranges of orbitals. For physically meaningful results prior
+  localisation (Pipek--Mezey recommended) and sorting by atomic sites is
+  required. The latter step is not performed by the :program:`Localisation` module and
+  requires manual relabelling within the :file:`LocOrb` file.
+
+  At least one integer is required, specifying the length of the orbital
+  vectors, whereas an optional second integer determines whether the vectors are
+  the same (``1``) or different (any other number or no argument). In the latter
+  case, both orbital vectors must be specified in the following two lines.
+
+  Consider a triangle with sites A B C, each with three unpaired electrons,
+  corresponding to a CAS(9,9). Below, a few practical examples are given: ::
+
+    * Spin correlation from orbital 1 to 6
+    SSCR = 6 1
+    * or
+    SSCR = 6
+    1 2 3 4 5 6
+    1 2 3 4 5 6
+    * Spin correlation between sites A (1-3) and C (7-9)
+    SSCR = 3
+    1 2 3
+    7 8 9
+    * or
+    SSCR = 3
+    1 2 3
+    7 8 9
+
+  Notice that the numbering is consecutive and each entry in an orbital range
+  has to be unique.
+
+  .. xmldoc:: <KEYWORD MODULE="RASSCF" NAME="SSCR" LEVEL="BASIC" APPEAR="spin-spin-correlation" KIND="INTS_COMPUTED" SIZE="2">
+              <ALTERNATE KIND="INTS" SIZE="2" />
+              %%Keyword: SSCR <basic>
+              <HELP>
+              Calculate the pairwise orbital resolved spin-spin correlation
+              function, for instance between two magnetically coupled centers,
+              after localisation and site-ordering of the corresponding
+              orbitals. Please consult the manual for further guidance. The
+              keyword uses a modified syntax already known from CIROots. At
+              least one input is required, specifying the length of the orbital
+              vectors, whereas an optional second input determines whether the
+              vectors are the same (1) or different (any other number or no
+              argument). In the latter case, both orbital vectors must be
+              specified in the following two lines.
               </HELP>
               </KEYWORD>
 
@@ -2277,6 +2328,23 @@ A list of these keywords is given below:
               %%Keyword: CMSS <advanced>
               <HELP>
               This keyword specifies file that provides the starting rotation matrix for CMS intermediate states.
+              </HELP>
+              </KEYWORD>
+
+:kword:`CMSOpt`
+  This keyword defines the maximization algorithm to find the CMS intermediate states (see :kword:`CMSInter`). The allowed values are:
+
+  * **Newton:** Newton's method. The Hessian and the gradient of the sum-over-states 
+    of the active--active classical Coulomb energies are computed. This is the 
+    default for calculations with more than two states.
+  * **Jacobi:** Jacobi's method. States are rotated in pairwise succession, 
+    and a trigonometric function is used to fit such rotation to find the 
+    maximum. This is the default for calculations with two states.
+
+  .. xmldoc:: <KEYWORD MODULE="RASSCF" NAME="CMSO" APPEAR="CMS Optimization Option" LEVEL="ADVANCED" KIND="CHOICE" LIST="Newton,Jacobi" DEFAULT_VALUE="Newton" >
+              %%Keyword: CMSO <advanced>
+              <HELP>
+              This keyword specifies the maximization algorithm to find the CMS intermediate states.
               </HELP>
               </KEYWORD>
 
