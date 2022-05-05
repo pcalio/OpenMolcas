@@ -32,7 +32,6 @@
       if (ispin.ne.1)
      &CALL Put_DArray('D1SAO_MS        ',Work(D1SAOMS),nTot1*nRoots)
 
-
 **********Fock_Occ Part
       CALL FZero(Work(ipFocc),ntot1)
       DO JRoot=1,lRoots

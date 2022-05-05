@@ -277,6 +277,7 @@ if (isNAC) then
   call PrGrad('CI derivative coupling ',Grad,lDisp(0),ChDisp)
   if (DoCSF) then
     call mma_Allocate(CSFG,lDisp(0),Label='CSFG')
+    !include the extra stuff in this next function
     call CSFGrad(CSFG,lDisp(0))
     call PrGrad('CSF derivative coupling ',CSFG,lDisp(0),ChDisp)
     call daxpy_(lDisp(0),EDiff,CSFG,1,Grad,1)

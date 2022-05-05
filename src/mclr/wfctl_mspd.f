@@ -190,7 +190,23 @@
 ************************************************************************
 *                                                                      *
       If (isNAC) Then
-        Call RHS_NAC(Temp4)
+*      This checks if the MS-PDFT is CMS-PDFT *
+       LURot=233
+       LURot=IsFreeUnit(LURot)
+       Call Molcas_Open(LURot,'ROT_VEC')
+       DO JRoot=1,nRoots
+         read(LURot,*) VecName
+       END DO
+       read(LURot,*) VecName
+       CLOSE(LURot)
+       if(VecName.eq.'CMS-PDFT') THEN
+         Call RHS_CMS_NAC(Temp4,W(ipST)%Vec)
+*      CALL DMinvCI_SA(ipST,W(ipS2)%Vec,rdum(1),isym,Fancy)            *
+       else
+        write(6,'(6X,A)')'Error: Lagrangian Not Implemented for MS-PDFT'
+        write(6,'(6X,A)')'       Other Than CMS-PDFT'
+        CALL xQuit(96)
+       end if
       Else
        LURot=233
        LURot=IsFreeUnit(LURot)

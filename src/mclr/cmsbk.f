@@ -174,7 +174,7 @@
       Real*8,DIMENSION(:),Allocatable::DMatAO,DIAO,D5,D6
       INTEGER I,K,NCSFs
       Real*8 Fact
-      INTEGER iB,jB,kB,lB,iDkl,iRijkl
+      INTEGER iB,jB,kB,lB,iDkl,iRijkl, iS
 ************************************************************************
 *                                                                      *
        itri(i,j)=Max(i,j)*(Max(i,j)-1)/2+Min(i,j)
@@ -205,6 +205,7 @@
        CALL DCopy_(nConfL,CIL,1,CIR,1)
        Call Densi2(2,G1r,G2rt,CIL,CIR,0,0,0,ntash**2,
      &              itri(ntash**2,ntash**2))
+
        Do iA=1,nnA
          Do jA=1,nnA
            Do kA=1,nnA

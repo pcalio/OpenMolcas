@@ -351,7 +351,12 @@ c
        If (isNAC) Then
          ng1=nNAC
          Call mma_allocate(G1q,ng1,Label='G1q')
-         Call Get_D1MO(G1q,ng1)
+         Call Get_cArray('Relax Method',Method,8)
+         if(Method.eq.'MSPDFT  ') then
+          Call Get_DArray('D1MOt           ',G1q,ng1)
+         else
+          Call Get_D1MO(G1q,ng1)
+         end if
          iR = 0 ! set to dummy value.
        Else
          iR=iroot(istate)
@@ -410,11 +415,16 @@ c Note: no inactive part for transition densities
 ** Transform the antisymmetric transition density matrix to AO
 **  (there is no guarantee the symmetry will work here)
 *
-         iDisk=0
-         LuDens=20
-         Call DaName(LuDens,'MCLRDENS')
-         Call dDaFile(LuDens,2,G1q,ng1,iDisk)
-         Call DaClos(LuDens)
+*** PAUL PC: MCLRDENS contains the antisymmetric part in rhs_nac
+*** The CMS-PDFT NAC code currently does not include this
+         Call Get_cArray('Relax Method',Method,8)
+         if(Method.ne.'MSPDFT  ') then
+          iDisk=0
+          LuDens=20
+          Call DaName(LuDens,'MCLRDENS')
+          Call dDaFile(LuDens,2,G1q,ng1,iDisk)
+          Call DaClos(LuDens)
+         end if
          Call mma_allocate(G1m,ndens2,Label='G1m')
          G1m(:)=Zero
 * Reconstruct the square matrix
